@@ -18,6 +18,7 @@ class CImage:
             self.img.load()
 
         self.mode = self.img.mode
+        self.width, self.height = self.img.size
 
     def change_contrast(self, contrast, brightness):
         if self.mode == 'L':
@@ -28,3 +29,5 @@ class CImage:
             g = change_contrast(g, contrast, brightness)
             b = change_contrast(b, contrast, brightness)
             self.img = Image.merge('RGB', (r,g,b))
+
+        return self
