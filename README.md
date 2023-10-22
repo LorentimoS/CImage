@@ -16,9 +16,9 @@ Class **CImge** is designed to work with color and black/white images
 ### change_contrast
 Method is intended to change contrast or brightness of image
 
-**Input parameters:**
-    ***contrast** - parameter for changhing contrast
-    ***brightness** - parameter for changhing brightness
+**Input:**
+    * **contrast** - parameter for changhing contrast
+    * **brightness** - parameter for changhing brightness
     
 **Output** - an image to which the method has been applied with changed contrast and brightness
 
