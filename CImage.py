@@ -31,20 +31,20 @@ class CImage:
             self.img = Image.merge('RGB', (r,g,b))
 
         return self
-
-def invert_image(base_image_path):
-    image = Image.open(base_image_path)
+            
+image_path = ' '
+def invert_image(image_path):
+    image = Image.open(image_path)
     width, height = image.size
     inverted_image = Image.new('RGB', (width, height))
-        
-    for pixY in range(height):
-        for pixX in range(width):
-            pixel = image.getpixel((pixX, pixY))
+    for y in range(height):
+        for x in range(width):
+            pixel = image.getpixel((x, y))
             inverted_pixel = tuple(255 - value for value in pixel)
-            inverted_image.putpixel((pixX, pixY), inverted_pixel)
+            inverted_image.putpixel((x, y), inverted_pixel)
     inverted_image.show()
-result_image = ' '
-invert_image(base_image_path)
+invert_image(image_path)
+
 
 
 def overlay_with_transparency(base_image_path, overlay_image_path, alpha):
@@ -72,4 +72,5 @@ result_image = overlay_with_transparency(base_image_path, overlay_image_path, al
 alpha = 0.5
 base_image_path = " "
 overlay_image_path = " "
-result_image.save(" ")
+result_image = overlay_with_transparency(base_image_path, overlay_image_path, alpha)
+
