@@ -1,4 +1,5 @@
 from PIL import Image
+from numpy import sqrt
 
 def change_contrast(img_in, contrast, brightness):
         wid, hei = img_in.size
@@ -9,6 +10,49 @@ def change_contrast(img_in, contrast, brightness):
                 img_out.putpixel((pixX,pixY), pxl)
 
         return img_out
+
+
+def zero_padding(img, size):
+    wid, hei = img.size
+    img_out = Image.new('L',(wid+2*size,hei+2*size))
+    for pixX in range(wid):
+        for pixY in range(hei):
+            pxl = img.getpixel((pixX,pixY))
+            img_out.putpixel((pixX+size,pixY+size), pxl)
+
+    return img_out
+
+def edge_det(img, xory = 'xy', size_kernel = 3):
+    wid, hei = img.size
+    img_pad = zero_padding(img, int((size_kernel-1)/2))
+    img_out = Image.new('L',(wid,hei))
+
+    for pixX in range(wid):
+        for pixY in range(hei):
+            if xory == 'xy': 
+                pxl_x = edge_kernel(img_pad, pixX, pixY, size_kernel, 'x')
+                pxl_y = edge_kernel(img_pad, pixX, pixY, size_kernel, 'y')
+                pxl_new = sqrt(pxl_x**2 + pxl_y**2)
+            else:
+                pxl_new = edge_kernel(img_pad, pixX, pixY, size_kernel, xory)
+
+            img_out.putpixel((pixX,pixY), int(pxl_new))
+
+    return img_out
+
+def edge_kernel(img, x, y, size_kernel, xory):
+    if xory == 'x':
+        kernel = [[1,2,1], [0,0,0], [-1,-2,-1]]
+    else:
+        kernel = [[1,0,-1], [2,0,-2], [1,0,-1]]
+    
+    pxl_new = 0
+    for i in range(size_kernel):
+        for j in range(size_kernel):
+            pxl = img.getpixel((x + i, y + j))
+            pxl_new = pxl_new + pxl * kernel[i][j]
+
+    return pxl_new
     
 
 class CImage:
@@ -31,3 +75,16 @@ class CImage:
             self.img = Image.merge('RGB', (r,g,b))
 
         return self
+    
+    def edge_detection(self):
+        img_out = Image.new(self.mode,(self.width,self.height))
+        if self.mode == 'L':
+            img_out = edge_det(self.img)
+        else:
+            r, g, b = self.img.split()
+            r = edge_det(r)
+            g = edge_det(g)
+            b = edge_det(b)
+            img_out = Image.merge('RGB', (r,g,b))
+
+        return img_out

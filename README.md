@@ -18,10 +18,19 @@ Method is intended to change contrast or brightness of image
 
 **Input:**
 
+* **self** - the image to which the method is applied
+
 * **contrast** - parameter for changhing contrast
     
 * **brightness** - parameter for changhing brightness
     
-**Output:** an image to which the method has been applied with changed contrast and brightness
+**Output:** an image to which the method has been applied with changed contrast and brightness. Change original image of class!
 
-### 
+### edge_detection
+The method is intended to find the boundaries of depicted objects
+
+**Input:**
+
+* **self** - the image to which the method is applied
+    
+**Output:** an image to which the method has been applied. This is black image with white edges of objects.
