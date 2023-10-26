@@ -32,7 +32,6 @@ class CImage:
 
         return self
             
-image_path = ' '
 def invert_image(image_path):
     image = Image.open(image_path)
     width, height = image.size
@@ -43,34 +42,40 @@ def invert_image(image_path):
             inverted_pixel = tuple(255 - value for value in pixel)
             inverted_image.putpixel((x, y), inverted_pixel)
     inverted_image.show()
-invert_image(image_path)
-
 
 
 def overlay_with_transparency(base_image_path, overlay_image_path, alpha):
-  
     base_image = Image.open(base_image_path)
     overlay_image = Image.open(overlay_image_path)
+
     overlay_image = overlay_image.resize(base_image.size)
+
     img_out = Image.new(base_image.mode, base_image.size)
 
-    for pixX in range(base_image.width):
+    for x in range(base_image.width):
         for y in range(base_image.height):
-            base_color = base_image.getpixel((pixX, pixY))
-            overlay_color = overlay_image.getpixel((pixX, pixY))
+            base_color = base_image.getpixel((x, y))
+            overlay_color = overlay_image.getpixel((x, y))
+
             final_color = (
                 int((1 - alpha) * base_color[0] + alpha * overlay_color[0]),
                 int((1 - alpha) * base_color[1] + alpha * overlay_color[1]),
                 int((1 - alpha) * base_color[2] + alpha * overlay_color[2])
             )
 
-            img_out.putpixel((pixX, pixY), final_color)
+            img_out.putpixel((x, y), final_color)
+
     img_out.show()
     return img_out
-        
-result_image = overlay_with_transparency(base_image_path, overlay_image_path, alpha)
-alpha = 0.5
-base_image_path = " "
-overlay_image_path = " "
-result_image = overlay_with_transparency(base_image_path, overlay_image_path, alpha)
+
+
+if __name__ == "__main__":
+    image_path = 'D:\studies\GitP\inversion\imageT\T.jpg'
+    invert_image(image_path)
+
+    base_image_path = "D:\studies\GitP\B\imag\cupcakes.jpg"
+    overlay_image_path = "D:\studies\GitP\B\imag\eag.jpg"
+    alpha = 0.5
+    result_image = overlay_with_transparency(
+        base_image_path, overlay_image_path, alpha)
 
