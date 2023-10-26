@@ -1,5 +1,7 @@
 from PIL import Image
 from numpy import sqrt
+from numpy import ones
+from math import exp
 
 def change_contrast(img_in, contrast, brightness):
         wid, hei = img_in.size
@@ -21,6 +23,33 @@ def zero_padding(img, size):
             img_out.putpixel((pixX+size,pixY+size), pxl)
 
     return img_out
+
+def gauss_filter(img, size_kernel = 5):
+    wid, hei = img.size
+    img_pad = zero_padding(img, size_kernel-1)
+    img_out = Image.new('L',(wid,hei))
+
+    for pixX in range(wid):
+        for pixY in range(hei):
+            pxl_new = gauss_kernel(img_pad, pixX, pixY, size_kernel)
+            img_out.putpixel((pixX,pixY), int(pxl_new))
+
+    return img_out
+
+def gauss_kernel(img, x, y, size_kernel):
+    kernel = ones([size_kernel,size_kernel])
+    sigma = 1
+    bound = int((size_kernel - 1) / 2)
+    for i in range(-bound,bound+1):
+        for j in range(-bound,bound+1):
+            kernel[i+bound][j+bound] = exp(- (i*i+j*j) / 2 / sigma / sigma) / 2/3.14/sigma/sigma
+    pxl_new = 0
+    for i in range(-bound,bound+1):
+        for j in range(-bound,bound+1):
+            pxl = img.getpixel((x + i, y + j))
+            pxl_new = pxl_new + pxl * kernel[i+bound][j+bound]
+
+    return pxl_new
 
 def edge_det(img, xory = 'xy', size_kernel = 3):
     wid, hei = img.size
@@ -64,6 +93,9 @@ class CImage:
         self.mode = self.img.mode
         self.width, self.height = self.img.size
 
+    def show(self):
+        self.img.show()
+
     def change_contrast(self, contrast, brightness):
         if self.mode == 'L':
             self.img = change_contrast(self.img, contrast, brightness)
@@ -72,6 +104,18 @@ class CImage:
             r = change_contrast(r, contrast, brightness)
             g = change_contrast(g, contrast, brightness)
             b = change_contrast(b, contrast, brightness)
+            self.img = Image.merge('RGB', (r,g,b))
+
+        return self
+    
+    def gauss_blurring(self):
+        if self.mode == 'L':
+            self.img = gauss_filter(self.img)
+        else:
+            r, g, b = self.img.split()
+            r = gauss_filter(r)
+            g = gauss_filter(g)
+            b = gauss_filter(b)
             self.img = Image.merge('RGB', (r,g,b))
 
         return self
