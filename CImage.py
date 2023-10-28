@@ -31,51 +31,54 @@ class CImage:
             self.img = Image.merge('RGB', (r,g,b))
 
         return self
-            
-def invert_image(image_path):
-    image = Image.open(image_path)
-    width, height = image.size
-    inverted_image = Image.new('RGB', (width, height))
-    for y in range(height):
-        for x in range(width):
-            pixel = image.getpixel((x, y))
-            inverted_pixel = tuple(255 - value for value in pixel)
-            inverted_image.putpixel((x, y), inverted_pixel)
-    inverted_image.show()
 
+class ImageProcessor:
+    @classmethod
+    def invert_image(cls, image_path):
+        image = Image.open(image_path)
+        image = image.convert('RGBA')
+        width, height = image.size
+        inverted_image = Image.new('RGBA', (width, height))
 
-def overlay_with_transparency(base_image_path, overlay_image_path, alpha):
-    base_image = Image.open(base_image_path)
-    overlay_image = Image.open(overlay_image_path)
+        for y in range(height):
+            for x in range(width):
+                pixel = image.getpixel((x, y))
+                # Preserve alpha channel
+                inverted_pixel = tuple(
+                    255 - value for value in pixel[:3]) + (pixel[3],)
+                inverted_image.putpixel((x, y), inverted_pixel)
 
-    overlay_image = overlay_image.resize(base_image.size)
+        inverted_image.show()
 
-    img_out = Image.new(base_image.mode, base_image.size)
+    @classmethod
+    def overlay_with_transparency(cls, base_image_path, overlay_image_path, alpha):
+        base_image = Image.open(base_image_path)
+        overlay_image = Image.open(overlay_image_path)
+        base_image = base_image.convert('RGBA')  
+        overlay_image = overlay_image.convert('RGBA')  
+        overlay_image = overlay_image.resize(base_image.size)
+        img_out = Image.new(base_image.mode, base_image.size)
 
-    for x in range(base_image.width):
-        for y in range(base_image.height):
-            base_color = base_image.getpixel((x, y))
-            overlay_color = overlay_image.getpixel((x, y))
+        for x in range(base_image.width):
+            for y in range(base_image.height):
+                base_color = base_image.getpixel((x, y))
+                overlay_color = overlay_image.getpixel((x, y))
 
-            final_color = (
-                int((1 - alpha) * base_color[0] + alpha * overlay_color[0]),
-                int((1 - alpha) * base_color[1] + alpha * overlay_color[1]),
-                int((1 - alpha) * base_color[2] + alpha * overlay_color[2])
-            )
+                final_color = (
+                    int((1 - alpha) * base_color[0] + alpha * overlay_color[0]),
+                    int((1 - alpha) * base_color[1] + alpha * overlay_color[1]),
+                    int((1 - alpha) * base_color[2] + alpha * overlay_color[2]),
+                    int((1 - alpha) * base_color[3] + alpha * overlay_color[3])
+                )
 
-            img_out.putpixel((x, y), final_color)
-
-    img_out.show()
-    return img_out
-
-
+                img_out.putpixel((x, y), final_color)
+        img_out.show()
+        return img_out
 if __name__ == "__main__":
-    image_path = 'D:\studies\GitP\inversion\imageT\T.jpg'
-    invert_image(image_path)
+    image_path = ''
+    ImageProcessor.invert_image(image_path)
 
-    base_image_path = "D:\studies\GitP\B\imag\cupcakes.jpg"
-    overlay_image_path = "D:\studies\GitP\B\imag\eag.jpg"
+    base_image_path = ""
+    overlay_image_path = ""
     alpha = 0.5
-    result_image = overlay_with_transparency(
-        base_image_path, overlay_image_path, alpha)
-
+    result_image = ImageProcessor.overlay_with_transparency(base_image_path, overlay_image_path, alpha)
