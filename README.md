@@ -35,6 +35,26 @@ The method is intended to change contrast and / or brightness of image
 **Output:** an object of class with image to which the method has been applied with changed contrast and brightness. Also change original image of class!
 
 
+### draw_frame
+The method is intended to draw the frame of some color by two points
+
+**Input:**
+
+* **self** - the image to which the method is applied
+
+* **x1** - the X-coordinate of the first points of frame, top left corner
+
+* **y1** - the Y-coordinate of the first points of frame, top left corner
+
+* **x2** - the X-coordinate of the second points of frame, lower right corner
+
+* **y2** - the Y-coordinate of the second points of frame, lower right corner
+
+* **color** - the color of frame, must be int for black and white images or tuple for color images
+    
+**Output:** an oject of class with image with drawn frame of given color. Also change original image of class!
+
+
 ### gauss_blurring
 The method is intended to blur an image using a Gaussian kernel
 
@@ -43,13 +63,3 @@ The method is intended to blur an image using a Gaussian kernel
 * **self** - the image to which the method is applied
     
 **Output:** an oject of class with image to which the method of blurring has been applied. Also change original image of class!
-
-
-### edge_detection
-The method is intended to find the boundaries of depicted objects
-
-**Input:**
-
-* **self** - the image to which the method is applied
-    
-**Output:** an image to which the method has been applied. This is black image with white edges of objects.

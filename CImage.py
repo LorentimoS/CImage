@@ -1,5 +1,5 @@
 from PIL import Image
-from numpy import sqrt
+from PIL import ImageDraw
 from numpy import ones
 from math import exp
 
@@ -12,6 +12,18 @@ def change_contrast(img_in, contrast, brightness):
                 img_out.putpixel((pixX,pixY), pxl)
 
         return img_out
+
+
+def frame_by_points(img, x1,y1, x2,y2, color):
+    draw = ImageDraw.Draw(img)
+
+    line_color = color
+    line_width = 2
+
+    draw.line([x1,y1, x2,y1, x2,y2, x1,y2, x1,y1], 
+              fill = line_color, width = line_width)
+
+    return img
 
 
 def zero_padding(img, size):
@@ -28,7 +40,6 @@ def gauss_filter(img, size_kernel = 5):
     wid, hei = img.size
     img_pad = zero_padding(img, size_kernel-1)
     img_out = Image.new('L',(wid,hei))
-
     for pixX in range(wid):
         for pixY in range(hei):
             pxl_new = gauss_kernel(img_pad, pixX, pixY, size_kernel)
@@ -51,38 +62,7 @@ def gauss_kernel(img, x, y, size_kernel):
 
     return pxl_new
 
-def edge_det(img, xory = 'xy', size_kernel = 3):
-    wid, hei = img.size
-    img_pad = zero_padding(img, int((size_kernel-1)/2))
-    img_out = Image.new('L',(wid,hei))
 
-    for pixX in range(wid):
-        for pixY in range(hei):
-            if xory == 'xy': 
-                pxl_x = edge_kernel(img_pad, pixX, pixY, size_kernel, 'x')
-                pxl_y = edge_kernel(img_pad, pixX, pixY, size_kernel, 'y')
-                pxl_new = sqrt(pxl_x**2 + pxl_y**2)
-            else:
-                pxl_new = edge_kernel(img_pad, pixX, pixY, size_kernel, xory)
-
-            img_out.putpixel((pixX,pixY), int(pxl_new))
-
-    return img_out
-
-def edge_kernel(img, x, y, size_kernel, xory):
-    if xory == 'x':
-        kernel = [[1,2,1], [0,0,0], [-1,-2,-1]]
-    else:
-        kernel = [[1,0,-1], [2,0,-2], [1,0,-1]]
-    
-    pxl_new = 0
-    for i in range(size_kernel):
-        for j in range(size_kernel):
-            pxl = img.getpixel((x + i, y + j))
-            pxl_new = pxl_new + pxl * kernel[i][j]
-
-    return pxl_new
-    
 
 class CImage:
     def __init__(self, filename):
@@ -108,6 +88,18 @@ class CImage:
 
         return self
     
+    def draw_frame(self, x1,y1, x2,y2, color):
+        if self.mode == 'L':
+            self.img = frame_by_points(self.img, x1,y1, x2,y2, color)
+        else:
+            r, g, b = self.img.split()
+            r = frame_by_points(r, x1,y1, x2,y2, color[0])
+            g = frame_by_points(g, x1,y1, x2,y2, color[1])
+            b = frame_by_points(b, x1,y1, x2,y2, color[2])
+            self.img = Image.merge('RGB', (r,g,b))
+
+        return self
+    
     def gauss_blurring(self):
         if self.mode == 'L':
             self.img = gauss_filter(self.img)
@@ -119,16 +111,3 @@ class CImage:
             self.img = Image.merge('RGB', (r,g,b))
 
         return self
-    
-    def edge_detection(self):
-        img_out = Image.new(self.mode,(self.width,self.height))
-        if self.mode == 'L':
-            img_out = edge_det(self.img)
-        else:
-            r, g, b = self.img.split()
-            r = edge_det(r)
-            g = edge_det(g)
-            b = edge_det(b)
-            img_out = Image.merge('RGB', (r,g,b))
-
-        return img_out
