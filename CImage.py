@@ -43,9 +43,7 @@ class ImageProcessor:
         for y in range(height):
             for x in range(width):
                 pixel = image.getpixel((x, y))
-                # Preserve alpha channel
-                inverted_pixel = tuple(
-                    255 - value for value in pixel[:3]) + (pixel[3],)
+                    inverted_pixel = tuple(255 - value for value in pixel[:3]) + (pixel[3],)
                 inverted_image.putpixel((x, y), inverted_pixel)
 
         inverted_image.show()
