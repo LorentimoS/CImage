@@ -63,3 +63,23 @@ The method is intended to blur an image using a Gaussian kernel
 * **self** - the image to which the method is applied
     
 **Output:** an oject of class with image to which the method of blurring has been applied. Also change original image of class!
+
+ The ImageProcessor class provides methods for processing and manipulating images.
+   
+Methods:
+1. invert_image(cls, image_path)
+        Inverts the colors of the provided image and displays the result.
+        Parameters:
+        - cls: The class itself (automatically provided by the @classmethod decorator).
+        - image_path (str): The path to the input image file.
+2. overlay_with_transparency(cls, base_image_path, overlay_image_path, alpha)
+        Overlays two images with a specified alpha (transparency) value and displays the result.
+
+Parameters:
+        - cls: The class itself (automatically provided by the @classmethod decorator).
+        - base_image_path (str): The path to the base image file.
+        - overlay_image_path (str): The path to the overlay image file.
+        - alpha (float): The transparency level (0.0 for fully transparent, 1.0 for fully opaque).
+
+   
+### 
