@@ -152,11 +152,3 @@ class ImageProcessor:
                 img_out.putpixel((x, y), final_color)
         img_out.show()
         return img_out
-if __name__ == "__main__":
-    image_path = ''
-    ImageProcessor.invert_image(image_path)
-
-    base_image_path = ""
-    overlay_image_path = ""
-    alpha = 0.5
-    result_image = ImageProcessor.overlay_with_transparency(base_image_path, overlay_image_path, alpha)
