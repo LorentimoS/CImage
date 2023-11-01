@@ -26,8 +26,8 @@ Method is intended to change contrast or brightness of image
 
 
  The ImageProcessor class provides methods for processing and manipulating images.
-    Methods:
-    
+   
+Methods:
 1. invert_image(cls, image_path)
         Inverts the colors of the provided image and displays the result.
         Parameters:
@@ -42,12 +42,5 @@ Parameters:
         - overlay_image_path (str): The path to the overlay image file.
         - alpha (float): The transparency level (0.0 for fully transparent, 1.0 for fully opaque).
 
-Usage:
-    1. Invert an image:
-       image_path (str): Path to the image you want to invert.
-    2. Overlay two images with transparency:
-       base_image_path (str): Path to the base image.
-       overlay_image_path (str): Path to the overlay image.
-       alpha (float): Transparency level for the overlay (0.0 to 1.0).
    
 ### 
