@@ -1,7 +1,7 @@
 from PIL import Image
-from PIL import ImageDraw
 from numpy import ones
-from math import exp
+from numpy import sqrt
+
 
 def change_contrast(img_in, contrast, brightness):
         wid, hei = img_in.size
@@ -14,18 +14,6 @@ def change_contrast(img_in, contrast, brightness):
         return img_out
 
 
-def frame_by_points(img, x1,y1, x2,y2, color):
-    draw = ImageDraw.Draw(img)
-
-    line_color = color
-    line_width = 2
-
-    draw.line([x1,y1, x2,y1, x2,y2, x1,y2, x1,y1], 
-              fill = line_color, width = line_width)
-
-    return img
-
-
 def zero_padding(img, size):
     wid, hei = img.size
     img_out = Image.new('L',(wid+2*size,hei+2*size))
@@ -36,24 +24,21 @@ def zero_padding(img, size):
 
     return img_out
 
-def gauss_filter(img, size_kernel = 5):
+def average_filter(img, size_kernel = 3):
     wid, hei = img.size
     img_pad = zero_padding(img, size_kernel-1)
     img_out = Image.new('L',(wid,hei))
+
     for pixX in range(wid):
         for pixY in range(hei):
-            pxl_new = gauss_kernel(img_pad, pixX, pixY, size_kernel)
+            pxl_new = average_kernel(img_pad, pixX, pixY, size_kernel)
             img_out.putpixel((pixX,pixY), int(pxl_new))
 
     return img_out
 
-def gauss_kernel(img, x, y, size_kernel):
-    kernel = ones([size_kernel,size_kernel])
-    sigma = 1
+def average_kernel(img, x, y, size_kernel):
+    kernel = ones((size_kernel,size_kernel))/size_kernel/size_kernel
     bound = int((size_kernel - 1) / 2)
-    for i in range(-bound,bound+1):
-        for j in range(-bound,bound+1):
-            kernel[i+bound][j+bound] = exp(- (i*i+j*j) / 2 / sigma / sigma) / 2/3.14/sigma/sigma
     pxl_new = 0
     for i in range(-bound,bound+1):
         for j in range(-bound,bound+1):
@@ -62,6 +47,38 @@ def gauss_kernel(img, x, y, size_kernel):
 
     return pxl_new
 
+
+def edge_det(img, xory = 'xy', size_kernel = 3):
+    wid, hei = img.size
+    img_pad = zero_padding(img, int((size_kernel-1)/2))
+    img_out = Image.new('L',(wid,hei))
+
+    for pixX in range(wid):
+        for pixY in range(hei):
+            if xory == 'xy': 
+                pxl_x = edge_kernel(img_pad, pixX, pixY, size_kernel, 'x')
+                pxl_y = edge_kernel(img_pad, pixX, pixY, size_kernel, 'y')
+                pxl_new = sqrt(pxl_x**2 + pxl_y**2)
+            else:
+                pxl_new = edge_kernel(img_pad, pixX, pixY, size_kernel, xory)
+
+            img_out.putpixel((pixX,pixY), int(pxl_new))
+
+    return img_out
+
+def edge_kernel(img, x, y, size_kernel, xory):
+    if xory == 'x':
+        kernel = [[1,2,1], [0,0,0], [-1,-2,-1]]
+    else:
+        kernel = [[1,0,-1], [2,0,-2], [1,0,-1]]
+    
+    pxl_new = 0
+    for i in range(size_kernel):
+        for j in range(size_kernel):
+            pxl = img.getpixel((x + i, y + j))
+            pxl_new = pxl_new + pxl * kernel[i][j]
+
+    return pxl_new
 
 
 class CImage:
@@ -88,67 +105,26 @@ class CImage:
 
         return self
     
-    def draw_frame(self, x1,y1, x2,y2, color):
+    def average_blurring(self):
         if self.mode == 'L':
-            self.img = frame_by_points(self.img, x1,y1, x2,y2, color)
+            self.img = average_filter(self.img)
         else:
             r, g, b = self.img.split()
-            r = frame_by_points(r, x1,y1, x2,y2, color[0])
-            g = frame_by_points(g, x1,y1, x2,y2, color[1])
-            b = frame_by_points(b, x1,y1, x2,y2, color[2])
+            r = average_filter(r)
+            g = average_filter(g)
+            b = average_filter(b)
             self.img = Image.merge('RGB', (r,g,b))
 
         return self
     
-    def gauss_blurring(self):
+    def edge_detection(self):
         if self.mode == 'L':
-            self.img = gauss_filter(self.img)
+            self.img = edge_det(self.img)
         else:
             r, g, b = self.img.split()
-            r = gauss_filter(r)
-            g = gauss_filter(g)
-            b = gauss_filter(b)
+            r = edge_det(r)
+            g = edge_det(g)
+            b = edge_det(b)
             self.img = Image.merge('RGB', (r,g,b))
 
         return self
-
-class ImageProcessor:
-    @classmethod
-    def invert_image(cls, image_path):
-        image = Image.open(image_path)
-        image = image.convert('RGBA')
-        width, height = image.size
-        inverted_image = Image.new('RGBA', (width, height))
-
-        for y in range(height):
-            for x in range(width):
-                pixel = image.getpixel((x, y))
-                inverted_pixel = tuple(255 - value for value in pixel[:3]) + (pixel[3],)
-                inverted_image.putpixel((x, y), inverted_pixel)
-
-        inverted_image.show()
-
-    @classmethod
-    def overlay_with_transparency(cls, base_image_path, overlay_image_path, alpha):
-        base_image = Image.open(base_image_path)
-        overlay_image = Image.open(overlay_image_path)
-        base_image = base_image.convert('RGBA')  
-        overlay_image = overlay_image.convert('RGBA')  
-        overlay_image = overlay_image.resize(base_image.size)
-        img_out = Image.new(base_image.mode, base_image.size)
-
-        for x in range(base_image.width):
-            for y in range(base_image.height):
-                base_color = base_image.getpixel((x, y))
-                overlay_color = overlay_image.getpixel((x, y))
-
-                final_color = (
-                    int((1 - alpha) * base_color[0] + alpha * overlay_color[0]),
-                    int((1 - alpha) * base_color[1] + alpha * overlay_color[1]),
-                    int((1 - alpha) * base_color[2] + alpha * overlay_color[2]),
-                    int((1 - alpha) * base_color[3] + alpha * overlay_color[3])
-                )
-
-                img_out.putpixel((x, y), final_color)
-        img_out.show()
-        return img_out

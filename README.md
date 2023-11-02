@@ -64,6 +64,24 @@ The method is intended to blur an image using a Gaussian kernel
     
 **Output:** an oject of class with image to which the method of blurring has been applied. Also change original image of class!
 
+### average_blurring
+The method is intended to blur an image using a Average kernel
+
+**Input:**
+
+* **self** - the image to which the method is applied
+    
+**Output:** an oject of class with image to which the method of blurring has been applied. Also change original image of class!
+
+### edge_detection
+The method is intended to find edges
+
+**Input:**
+
+* **self** - the image to which the method is applied
+    
+**Output:** an oject of class with image to which the method has been applied. Also change original image of class!
+
  The ImageProcessor class provides methods for processing and manipulating images.
    
 Methods:
